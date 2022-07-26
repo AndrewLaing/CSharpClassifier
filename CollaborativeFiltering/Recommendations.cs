@@ -336,7 +336,7 @@ namespace CollaborativeFiltering
         public List<CategoryScore> 
             TopNCategoriesForFeature(string feature_name, int n, SimilarityScore ScoringFunction, bool includePredictions=false)
         {
-            List<CategoryScore> scoreList = new List<CategoryScore>();
+            List<CategoryScore> scoreList = new();
             foreach (string key in GetCategoryNames())
             {
                 bool feature_found = false;
@@ -380,8 +380,8 @@ namespace CollaborativeFiltering
         // Predicts the value a category would assign to a feature
         public double PredictFeatureValueForCategory(string category_name, string feature_name, SimilarityScore ScoringFunction)
         {
-            double totals = 0.0;
-            Dictionary<string, double> sim_sums = new();
+            double total = 0.0;
+            double sim_sum = 0.0;
 
             Dictionary<string, double>.KeyCollection features = GetFeatureNamesInCategory(category_name);
             double sim_score = 0.0;
@@ -401,23 +401,15 @@ namespace CollaborativeFiltering
                         if (feature_name.Equals(candidate))
                         {
                             double value_for_feature = GetValueForFeatureInCategory(key, candidate);
-                            totals += value_for_feature * sim_score;
-
-                            if (!sim_sums.ContainsKey(candidate))
-                            {
-                                sim_sums[candidate] = sim_score;
-                            }
-                            else
-                            {
-                                sim_sums[candidate] += sim_score;
-                            }
+                            total += value_for_feature * sim_score;
+                            sim_sum += sim_score;
                             break;
                         }
                     }
                 }
             }
 
-            return totals / sim_sums[feature_name];
+            return total / sim_sum;
         }
 
 
