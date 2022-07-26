@@ -84,6 +84,21 @@ static void testFeatureRecommendation(Recommendations data, string category, Sim
     }
 }
 
+
+static void testCategoriesForFeatureRecommendation(Recommendations data, string category, SimilarityScore scoringFunction, string header)
+{
+    List<CategoryScore> matches = data.TopNCategoriesForFeature(category, 100, scoringFunction, true);
+
+    Console.WriteLine(" ");
+    Console.WriteLine(" ");
+    Console.WriteLine(header);
+
+    foreach (CategoryScore match in matches)
+    {
+        Console.WriteLine(match.name + " " + match.value);
+    }
+}
+
 Recommendations data = new();
 addTestData(data);
 
@@ -99,3 +114,6 @@ testFeatureRecommendation(data, "Toby", scoringFunction, "==== Top 3 Feature Pea
 testFeatureRecommendation(data, "Toby", scoringFunction2, "==== Top 3 Feature Euclidean Matches ====");
 testFeatureRecommendation(data, "Toby", scoringFunction3, "==== Top 3 Feature Tanimoto Matches ====");
 
+testCategoriesForFeatureRecommendation(data, "The Night Listener", scoringFunction, "==== Top Pearson Category for feature Matches ====");
+testCategoriesForFeatureRecommendation(data, "The Night Listener", scoringFunction2, "==== Top Category for feature Euclidean Matches ====");
+testCategoriesForFeatureRecommendation(data, "The Night Listener", scoringFunction3, "==== Top Category for feature Tanimoto Matches ====");

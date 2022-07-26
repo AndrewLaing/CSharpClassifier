@@ -236,12 +236,12 @@ namespace CollaborativeFiltering
         // Recommend n similar categories.
         public List<CategoryScore> TopNCategoryRecommendations(string category_name, int n, SimilarityScore ScoringFunction)
         {
-            List<CategoryScore> criticScores = new List<CategoryScore>();
+            List<CategoryScore> scoreList = new List<CategoryScore>();
             foreach (string key in GetCategoryNames())
             {
                 if (!key.Equals(category_name))
                 {
-                    criticScores.Add(new CategoryScore()
+                    scoreList.Add(new CategoryScore()
                     {
                         name = key,
                         value = ScoringFunction(category_name, key)
@@ -249,16 +249,16 @@ namespace CollaborativeFiltering
                 }
             }
 
-            criticScores.Sort((x, y) => x.value.CompareTo(y.value));
-            criticScores.Reverse();
+            scoreList.Sort((x, y) => x.value.CompareTo(y.value));
+            scoreList.Reverse();
 
-            if (n < criticScores.Count)
+            if (n < scoreList.Count)
             {
-                return criticScores.GetRange(0, n);
+                return scoreList.GetRange(0, n);
             }
             else
             {
-                return criticScores;
+                return scoreList;
             }
         }
 
@@ -329,6 +329,97 @@ namespace CollaborativeFiltering
                 return rankings;
             }
         }
+
+
+        // Recommend n most popular categories for feature.
+        // If includePredictions is true, predictions for categories which do not have the feature will be added to result
+        public List<CategoryScore> 
+            TopNCategoriesForFeature(string feature_name, int n, SimilarityScore ScoringFunction, bool includePredictions=false)
+        {
+            List<CategoryScore> scoreList = new List<CategoryScore>();
+            foreach (string key in GetCategoryNames())
+            {
+                bool feature_found = false;
+                foreach(string feature in GetFeatureNamesInCategory(key))
+                {
+                    if(feature == feature_name)
+                    {
+                        scoreList.Add(new CategoryScore()
+                        {
+                            name = key,
+                            value = GetValueForFeatureInCategory(key, feature_name)
+                        });
+                        feature_found = true;
+                        break;
+                    }
+                }
+                if(!feature_found && includePredictions)
+                {
+                    scoreList.Add(new CategoryScore()
+                    {
+                        name = key,
+                        value = PredictFeatureValueForCategory(key, feature_name, ScoringFunction)
+                    }) ;
+                    // get predicted score for feature and add to list
+                }
+            }
+
+            scoreList.Sort((x, y) => x.value.CompareTo(y.value));
+            scoreList.Reverse();
+
+            if (n < scoreList.Count)
+            {
+                return scoreList.GetRange(0, n);
+            }
+            else
+            {
+                return scoreList;
+            }
+        }
+
+        // Predicts the value a category would assign to a feature
+        public double PredictFeatureValueForCategory(string category_name, string feature_name, SimilarityScore ScoringFunction)
+        {
+            double totals = 0.0;
+            Dictionary<string, double> sim_sums = new();
+
+            Dictionary<string, double>.KeyCollection features = GetFeatureNamesInCategory(category_name);
+            double sim_score = 0.0;
+
+            foreach (string key in GetCategoryNames())
+            {
+                if (!key.Equals(category_name))
+                {
+                    sim_score = ScoringFunction(category_name, key);
+                    if (sim_score <= 0.0)   // ignore similarity scores of 0 or lower
+                    {
+                        continue;
+                    }
+
+                    foreach (string candidate in GetFeatureNamesInCategory(key))
+                    {
+                        if (feature_name.Equals(candidate))
+                        {
+                            double value_for_feature = GetValueForFeatureInCategory(key, candidate);
+                            totals += value_for_feature * sim_score;
+
+                            if (!sim_sums.ContainsKey(candidate))
+                            {
+                                sim_sums[candidate] = sim_score;
+                            }
+                            else
+                            {
+                                sim_sums[candidate] += sim_score;
+                            }
+                            break;
+                        }
+                    }
+                }
+            }
+
+            return totals / sim_sums[feature_name];
+        }
+
 
         #endregion
     }
