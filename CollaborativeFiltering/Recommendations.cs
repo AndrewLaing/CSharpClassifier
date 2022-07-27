@@ -2,59 +2,59 @@
 
 namespace CollaborativeFiltering
 {
-    public delegate double SimilarityScore(string category_1, string category_2);
+    public delegate double SimilarityScore(string categoryA, string categoryB);
 
     public struct CategoryScore
     {
-        public string name;
-        public double value;
+        public string Name;
+        public double Value;
     }
 
     public struct FeatureScore
     {
-        public string name;
-        public double value;
+        public string Name;
+        public double Value;
     }
 
     public class Recommendations
     {
-        private Dictionary<string, Dictionary<string, double>> dataset;     // category(feature: value, ...), category(feature ... 
+        private Dictionary<string, Dictionary<string, double>> _dataset;     // category(feature: value, ...), category(feature ... 
 
         public Recommendations()
         {
-            dataset = new Dictionary<string, Dictionary<string, double>>();
+            _dataset = new Dictionary<string, Dictionary<string, double>>();
         }
 
         #region "Dataset management functions"
 
-        public bool ContainsCategory(string category_name)
+        public bool ContainsCategory(string categoryName)
         {
-            return dataset.ContainsKey(category_name);
+            return _dataset.ContainsKey(categoryName);
         }
 
-        public bool ContainsFeatureInCategory(string category_name, string feature_name)
+        public bool ContainsFeatureInCategory(string categoryName, string featureName)
         {
-            return dataset.ContainsKey(category_name) && dataset[category_name].ContainsKey(feature_name);
+            return _dataset.ContainsKey(categoryName) && _dataset[categoryName].ContainsKey(featureName);
         }
 
-        public void AddCategory(string category_name)
+        public void AddCategory(string categoryName)
         {
-            if (!ContainsCategory(category_name))
+            if (!ContainsCategory(categoryName))
             {
-                dataset.Add(category_name, new Dictionary<string, double>());
+                _dataset.Add(categoryName, new Dictionary<string, double>());
             }
         }
 
         public Dictionary<string, Dictionary<string, double>>.KeyCollection GetCategoryNames()
         {
-            return dataset.Keys;
+            return _dataset.Keys;
         }
 
-        public Dictionary<string, double>.KeyCollection GetFeatureNamesInCategory(string category_name)
+        public Dictionary<string, double>.KeyCollection GetFeatureNamesInCategory(string categoryName)
         {
-            if (ContainsCategory(category_name))
+            if (ContainsCategory(categoryName))
             {
-                return dataset[category_name].Keys;
+                return _dataset[categoryName].Keys;
             }
             else
             {
@@ -62,25 +62,25 @@ namespace CollaborativeFiltering
             }
         }
 
-        public void AddValueForFeatureToCategory(string category_name, string feature_name, double rating)
+        public void AddValueForFeatureToCategory(string categoryName, string featureName, double rating)
         {
-            AddCategory(category_name);
+            AddCategory(categoryName);
 
-            if (!dataset[category_name].ContainsKey(feature_name))
+            if (!_dataset[categoryName].ContainsKey(featureName))
             {
-                dataset[category_name].Add(feature_name, rating);
+                _dataset[categoryName].Add(featureName, rating);
             }
             else
             {
-                dataset[category_name][feature_name] = rating;
+                _dataset[categoryName][featureName] = rating;
             }
         }
 
-        public double GetValueForFeatureInCategory(string category_name, string feature_name)
+        public double GetValueForFeatureInCategory(string categoryName, string featureName)
         {
-            if (ContainsFeatureInCategory(category_name, feature_name))
+            if (ContainsFeatureInCategory(categoryName, featureName))
             {
-                return dataset[category_name][feature_name];
+                return _dataset[categoryName][featureName];
             }
             else
             {
@@ -98,75 +98,74 @@ namespace CollaborativeFiltering
          * Pearson   - Useful to correct for grade inflation.
          * Tanimoto  - Useful when looking for similarity of feature occurence, or those woth binary values.
          * 
-         *        e.g, A bought 1x eggs, 1x flour and 1x sugar.
-         *             B bought 100x eggs, 100x flour and 100x sugar.
-         *             C bought 1x eggs, 1x Vodka and 1x Red Bull.
+         *        e.g, A bought 1 egg, 1 flour and 1 sugar.
+         *             B bought 100 egg, 100 flour and 100 sugar.
+         *             C bought 1 egg, 1 Vodka and 1 Red Bull.
          *             Whilst using Euclidean will find that C is more similar to A, Pearson and Tanimoto show B and A as more similar.
          */
 
 
-        public double EuclideanDistanceScore(string category_1, string category_2)
+        public double EuclideanDistanceScore(string categoryA, string categoryB)
         {
-            if (!ContainsCategory(category_1) || !ContainsCategory(category_2))
+            if (!ContainsCategory(categoryA) || !ContainsCategory(categoryB))
             {
                 return 0.0;
             }
 
-            double sum_of_squares = 0.0;
-            Dictionary<string, double>.KeyCollection critic_1_movies = GetFeatureNamesInCategory(category_1);
-            Dictionary<string, double>.KeyCollection critic_2_movies = GetFeatureNamesInCategory(category_2);
+            double sumOfSquares = 0.0;
+            Dictionary<string, double>.KeyCollection categoryAFeatures = GetFeatureNamesInCategory(categoryA);
+            Dictionary<string, double>.KeyCollection categoryBFeatures = GetFeatureNamesInCategory(categoryB);
 
-            foreach (string key1 in critic_1_movies)
+            foreach (string featureInA in categoryAFeatures)
             {
-                foreach (string key2 in critic_2_movies)
+                foreach (string featureInB in categoryBFeatures)
                 {
-                    if (key1 == key2)
+                    if (featureInA == featureInB)
                     {
-                        double rating_c1 = GetValueForFeatureInCategory(category_1, key1);
-                        double rating_c2 = GetValueForFeatureInCategory(category_2, key2);
-                        sum_of_squares += Pow((rating_c1 - rating_c2), 2);
+                        double valueA = GetValueForFeatureInCategory(categoryA, featureInA);
+                        double valueB = GetValueForFeatureInCategory(categoryB, featureInB);
+                        sumOfSquares += Pow((valueA - valueB), 2);
                     }
                 }
             }
 
-            // if they have no ratings in common
-            if (sum_of_squares == 0.0)
+            if (sumOfSquares == 0.0)            // if the 2 categories have no common features
             {
                 return 0.0;
             }
 
-            return 1 / (1 + sum_of_squares);
+            return 1 / (1 + sumOfSquares);
         }
 
-        public double PearsonCorrelationScore(string category_1, string category_2)
+        public double PearsonCorrelationScore(string categoryA, string categoryB)
         {
-            if (!ContainsCategory(category_1) || !ContainsCategory(category_2))
+            if (!ContainsCategory(categoryA) || !ContainsCategory(categoryB))
             {
                 return 0.0;
             }
 
-            double sum_c1 = 0.0;                // sum of mutual item ratings for critic_1 
-            double sum_c2 = 0.0;
-            double sum_of_squares_c1 = 0.0;     // sum of squares of mutual item ratings for critic_1 
-            double sum_of_squares_c2 = 0.0;
-            double sum_of_products = 0.0;       // sum of products of rating by critic_1 for item * those of critic_2 
+            double sumA = 0.0;                  // sum of mutual item ratings for crategoryA 
+            double sumB = 0.0;
+            double sumOfSquaresA = 0.0;         // sum of squares of mutual item ratings for critic_1 
+            double sumOfSquaresB = 0.0;
+            double sumOfProducts = 0.0;         // sum of products of rating by critic_1 for item * those of critic_2 
             int n = 0;                          // number of mutually rated items
-            Dictionary<string, double>.KeyCollection critic_1_movies = GetFeatureNamesInCategory(category_1);
-            Dictionary<string, double>.KeyCollection critic_2_movies = GetFeatureNamesInCategory(category_2);
+            Dictionary<string, double>.KeyCollection categoryAFeatures = GetFeatureNamesInCategory(categoryA);
+            Dictionary<string, double>.KeyCollection categoryBFeatures = GetFeatureNamesInCategory(categoryB);
 
-            foreach (string key1 in critic_1_movies)
+            foreach (string featureInA in categoryAFeatures)
             {
-                foreach (string key2 in critic_2_movies)
+                foreach (string featureInB in categoryBFeatures)
                 {
-                    if (key1 == key2)
+                    if (featureInA == featureInB)
                     {
-                        double rating_c1 = GetValueForFeatureInCategory(category_1, key1);
-                        double rating_c2 = GetValueForFeatureInCategory(category_2, key2);
-                        sum_c1 += rating_c1;
-                        sum_c2 += rating_c2;
-                        sum_of_squares_c1 += Pow(rating_c1, 2);
-                        sum_of_squares_c2 += Pow(rating_c2, 2);
-                        sum_of_products += (rating_c1 * rating_c2);
+                        double valueA = GetValueForFeatureInCategory(categoryA, featureInA);
+                        double valueB = GetValueForFeatureInCategory(categoryB, featureInB);
+                        sumA += valueA;
+                        sumB += valueB;
+                        sumOfSquaresA += Pow(valueA, 2);
+                        sumOfSquaresB += Pow(valueB, 2);
+                        sumOfProducts += (valueA * valueB);
                         n++;
                     }
                 }
@@ -179,8 +178,8 @@ namespace CollaborativeFiltering
             }
 
             // Calculate PearsonScore
-            double numerator = sum_of_products - (sum_c1 * sum_c2 / n);
-            double denominator = Sqrt((sum_of_squares_c1 - Pow(sum_c1, 2) / n) * (sum_of_squares_c2 - Pow(sum_c2, 2) / n));
+            double numerator = sumOfProducts - (sumA * sumB / n);
+            double denominator = Sqrt((sumOfSquaresA - Pow(sumA, 2) / n) * (sumOfSquaresB - Pow(sumB, 2) / n));
             if (denominator == 0)
             {
                 return 0.0;
@@ -191,34 +190,31 @@ namespace CollaborativeFiltering
             }
         }
 
-        public double TanimotoSimilarityScore(string category_1, string category_2)
+        public double TanimotoSimilarityScore(string categoryA, string categoryB)
         {
-            if (!ContainsCategory(category_1) || !ContainsCategory(category_2))
+            if (!ContainsCategory(categoryA) || !ContainsCategory(categoryB))
             {
                 return 0.0;
             }
 
-            Dictionary<string, double>.KeyCollection critic_1_movies = GetFeatureNamesInCategory(category_1);
-            Dictionary<string, double>.KeyCollection critic_2_movies = GetFeatureNamesInCategory(category_2);
+            Dictionary<string, double>.KeyCollection categoryAFeatures = GetFeatureNamesInCategory(categoryA);
+            Dictionary<string, double>.KeyCollection categoryBFeatures = GetFeatureNamesInCategory(categoryB);
 
-            int Na = critic_1_movies.Count;
-            int Nb = critic_2_movies.Count;
-            int Nc = 0;
-
-            foreach (string key1 in critic_1_movies)
+            int sharedFeaturesCount = 0;
+            foreach (string featureInA in categoryAFeatures)
             {
-                foreach (string key2 in critic_2_movies)
+                foreach (string featureInB in categoryBFeatures)
                 {
-                    if (key1 == key2)
+                    if (featureInA == featureInB)
                     {
-                        Nc++;
+                        sharedFeaturesCount++;
                     }
                 }
             }
 
             // Calculate TanimotoScore
-            double numerator = Nc;
-            double denominator = Na + Nb - Nc;
+            double numerator = sharedFeaturesCount;
+            double denominator = categoryAFeatures.Count + categoryBFeatures.Count - sharedFeaturesCount;
             if (denominator == 0)
             {
                 return 0.0;
@@ -234,22 +230,22 @@ namespace CollaborativeFiltering
         #region "Categorisation functions"
 
         // Recommend n similar categories.
-        public List<CategoryScore> TopNCategoryRecommendations(string category_name, int n, SimilarityScore ScoringFunction)
+        public List<CategoryScore> TopNCategoryRecommendations(string categoryName, int n, SimilarityScore scoringFunction)
         {
-            List<CategoryScore> scoreList = new List<CategoryScore>();
-            foreach (string key in GetCategoryNames())
+            List<CategoryScore> scoreList = new();
+            foreach (string category in GetCategoryNames())
             {
-                if (!key.Equals(category_name))
+                if (!category.Equals(categoryName))
                 {
                     scoreList.Add(new CategoryScore()
                     {
-                        name = key,
-                        value = ScoringFunction(category_name, key)
+                        Name = category,
+                        Value = scoringFunction(categoryName, category)
                     });
                 }
             }
 
-            scoreList.Sort((x, y) => x.value.CompareTo(y.value));
+            scoreList.Sort((x, y) => x.Value.CompareTo(y.Value));
             scoreList.Reverse();
 
             if (n < scoreList.Count)
@@ -263,70 +259,70 @@ namespace CollaborativeFiltering
         }
 
         // Recommend n features not in category
-        public List<FeatureScore> TopNFeatureRecommendations(string category_name, int n, SimilarityScore ScoringFunction)
+        public List<FeatureScore> TopNFeatureRecommendations(string categoryName, int n, SimilarityScore scoringFunction)
         {
-            List<FeatureScore> rankings = new();
+            List<FeatureScore> rankedFeatures = new();
             Dictionary<string, double> totals = new();
-            Dictionary<string, double> sim_sums = new();
+            Dictionary<string, double> simSums = new();
 
-            Dictionary<string, double>.KeyCollection features = GetFeatureNamesInCategory(category_name);
-            double sim_score = 0.0;
+            Dictionary<string, double>.KeyCollection features = GetFeatureNamesInCategory(categoryName);
+            double simScore = 0.0;
 
-            foreach (string key in GetCategoryNames())
+            foreach (string category in GetCategoryNames())
             {
-                if (!key.Equals(category_name))
+                if (!category.Equals(categoryName))
                 {
-                    sim_score = ScoringFunction(category_name, key);
-                    if (sim_score <= 0.0)   // ignore similarity scores of 0 or lower
+                    simScore = scoringFunction(categoryName, category);
+                    if (simScore <= 0.0)   // ignore similarity scores of 0 or lower
                     {
                         continue;
                     }
 
-                    foreach (string candidate in GetFeatureNamesInCategory(key))
+                    foreach (string feature in GetFeatureNamesInCategory(category))
                     {
-                        if (!features.Contains(candidate))
+                        if (!features.Contains(feature))
                         {
-                            double value_for_feature = GetValueForFeatureInCategory(key, candidate);
-                            if (!totals.ContainsKey(candidate))
+                            double valueForFeature = GetValueForFeatureInCategory(category, feature);
+                            if (!totals.ContainsKey(feature))
                             {
-                                totals[candidate] = (value_for_feature * sim_score);
+                                totals[feature] = valueForFeature * simScore;
                             }
                             else
                             {
-                                totals[candidate] += (value_for_feature * sim_score);
+                                totals[feature] += valueForFeature * simScore;
                             }
-                            if (!sim_sums.ContainsKey(candidate))
+                            if (!simSums.ContainsKey(feature))
                             {
-                                sim_sums[candidate] = sim_score;
+                                simSums[feature] = simScore;
                             }
                             else
                             {
-                                sim_sums[candidate] += sim_score;
+                                simSums[feature] += simScore;
                             }
                         }
                     }
                 }
             }
 
-            foreach (string fName in totals.Keys)
+            foreach (string feature in totals.Keys)
             {
-                rankings.Add(new FeatureScore()
+                rankedFeatures.Add(new FeatureScore()
                 {
-                    name = fName,
-                    value = totals[fName] / sim_sums[fName]
+                    Name = feature,
+                    Value = totals[feature] / simSums[feature]
                 });
             }
 
-            rankings.Sort((x, y) => x.value.CompareTo(y.value));
-            rankings.Reverse();
+            rankedFeatures.Sort((x, y) => x.Value.CompareTo(y.Value));
+            rankedFeatures.Reverse();
 
-            if (n < rankings.Count)
+            if (n < rankedFeatures.Count)
             {
-                return rankings.GetRange(0, n);
+                return rankedFeatures.GetRange(0, n);
             }
             else
             {
-                return rankings;
+                return rankedFeatures;
             }
         }
 
@@ -334,37 +330,36 @@ namespace CollaborativeFiltering
         // Recommend n most popular categories for feature.
         // If includePredictions is true, predictions for categories which do not have the feature will be added to result
         public List<CategoryScore> 
-            TopNCategoriesForFeature(string feature_name, int n, SimilarityScore ScoringFunction, bool includePredictions=false)
+            TopNCategoriesForFeature(string featureName, int n, SimilarityScore scoringFunction, bool includePredictions=false)
         {
             List<CategoryScore> scoreList = new();
-            foreach (string key in GetCategoryNames())
+            foreach (string category in GetCategoryNames())
             {
-                bool feature_found = false;
-                foreach(string feature in GetFeatureNamesInCategory(key))
+                bool featureFound = false;
+                foreach(string feature in GetFeatureNamesInCategory(category))
                 {
-                    if(feature == feature_name)
+                    if(feature == featureName)
                     {
                         scoreList.Add(new CategoryScore()
                         {
-                            name = key,
-                            value = GetValueForFeatureInCategory(key, feature_name)
+                            Name = category,
+                            Value = GetValueForFeatureInCategory(category, feature)
                         });
-                        feature_found = true;
+                        featureFound = true;
                         break;
                     }
                 }
-                if(!feature_found && includePredictions)
+                if(!featureFound && includePredictions)   // get predicted score for feature and add to list
                 {
                     scoreList.Add(new CategoryScore()
                     {
-                        name = key,
-                        value = PredictFeatureValueForCategory(key, feature_name, ScoringFunction)
+                        Name = category,
+                        Value = PredictFeatureValueForCategory(category, featureName, scoringFunction)
                     }) ;
-                    // get predicted score for feature and add to list
                 }
             }
 
-            scoreList.Sort((x, y) => x.value.CompareTo(y.value));
+            scoreList.Sort((x, y) => x.Value.CompareTo(y.Value));
             scoreList.Reverse();
 
             if (n < scoreList.Count)
@@ -378,40 +373,37 @@ namespace CollaborativeFiltering
         }
 
         // Predicts the value a category would assign to a feature
-        public double PredictFeatureValueForCategory(string category_name, string feature_name, SimilarityScore ScoringFunction)
+        public double PredictFeatureValueForCategory(string categoryName, string featureName, SimilarityScore scoringFunction)
         {
             double total = 0.0;
-            double sim_sum = 0.0;
+            double simSum = 0.0;
+            double simScore;
 
-            Dictionary<string, double>.KeyCollection features = GetFeatureNamesInCategory(category_name);
-            double sim_score = 0.0;
-
-            foreach (string key in GetCategoryNames())
+            foreach (string category in GetCategoryNames())
             {
-                if (!key.Equals(category_name))
+                if (!category.Equals(categoryName))
                 {
-                    sim_score = ScoringFunction(category_name, key);
-                    if (sim_score <= 0.0)   // ignore similarity scores of 0 or lower
+                    simScore = scoringFunction(categoryName, category);
+                    if (simScore <= 0.0)   // ignore similarity scores of 0 or lower
                     {
                         continue;
                     }
 
-                    foreach (string candidate in GetFeatureNamesInCategory(key))
+                    foreach (string candidate in GetFeatureNamesInCategory(category))
                     {
-                        if (feature_name.Equals(candidate))
+                        if (featureName.Equals(candidate))
                         {
-                            double value_for_feature = GetValueForFeatureInCategory(key, candidate);
-                            total += value_for_feature * sim_score;
-                            sim_sum += sim_score;
+                            double value_for_feature = GetValueForFeatureInCategory(category, candidate);
+                            total += value_for_feature * simScore;
+                            simSum += simScore;
                             break;
                         }
                     }
                 }
             }
 
-            return total / sim_sum;
+            return total / simSum;
         }
-
 
         #endregion
     }

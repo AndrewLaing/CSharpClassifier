@@ -1,9 +1,7 @@
 ﻿// See https://aka.ms/new-console-template for more information
-using System.Collections.Generic;
 using CollaborativeFiltering;
-using static System.Math;
 
-static void addTestData(Recommendations data)
+static void AddTestData(Recommendations data)
 {
     data.AddCategory("Lisa Rose");
     data.AddCategory("Gene Seymour");
@@ -56,64 +54,58 @@ static void addTestData(Recommendations data)
     data.AddValueForFeatureToCategory("Toby", "You, Me and Dupree", 1.0);
 }
 
-static void testCategoryRecommendation(Recommendations data, string category, SimilarityScore scoringFunction, string header)
+static void TestCategoryRecommendation(Recommendations data, string category, SimilarityScore scoringFunction, string header)
 {
     List<CategoryScore> matches = data.TopNCategoryRecommendations(category, 3, scoringFunction);
 
-    Console.WriteLine(" ");
-    Console.WriteLine(" ");
-    Console.WriteLine(header);
+    Console.WriteLine("\n\n" + header);
 
     foreach (CategoryScore match in matches)
     {
-        Console.WriteLine(match.name + " " + match.value);
+        Console.WriteLine(match.Name + " " + match.Value);
     }
 }
 
-static void testFeatureRecommendation(Recommendations data, string category, SimilarityScore scoringFunction, string header)
+static void TestFeatureRecommendation(Recommendations data, string category, SimilarityScore scoringFunction, string header)
 {
     List<CategoryScore> matches = data.TopNCategoryRecommendations(category, 3, scoringFunction);
 
-    Console.WriteLine(" ");
-    Console.WriteLine(" ");
-    Console.WriteLine(header);
+    Console.WriteLine("\n\n" + header);
 
     foreach (FeatureScore score in data.TopNFeatureRecommendations("Toby", 3, scoringFunction))
     {
-        Console.WriteLine(score.name + " " + score.value);
+        Console.WriteLine(score.Name + " " + score.Value);
     }
 }
 
 
-static void testCategoriesForFeatureRecommendation(Recommendations data, string category, SimilarityScore scoringFunction, string header)
+static void TestCategoriesForFeatureRecommendation(Recommendations data, string category, SimilarityScore scoringFunction, string header)
 {
     List<CategoryScore> matches = data.TopNCategoriesForFeature(category, 100, scoringFunction, true);
 
-    Console.WriteLine(" ");
-    Console.WriteLine(" ");
-    Console.WriteLine(header);
+    Console.WriteLine("\n\n" + header);
 
     foreach (CategoryScore match in matches)
     {
-        Console.WriteLine(match.name + " " + match.value);
+        Console.WriteLine(match.Name + " " + match.Value);
     }
 }
 
 Recommendations data = new();
-addTestData(data);
+AddTestData(data);
 
-SimilarityScore scoringFunction = new SimilarityScore(data.PearsonCorrelationScore);
-SimilarityScore scoringFunction2 = new SimilarityScore(data.EuclideanDistanceScore);
-SimilarityScore scoringFunction3 = new SimilarityScore(data.TanimotoSimilarityScore);
+SimilarityScore pearsonScoring = new(data.PearsonCorrelationScore);
+SimilarityScore euclideanScoring = new(data.EuclideanDistanceScore);
+SimilarityScore tanimotoScoring = new(data.TanimotoSimilarityScore);
 
-testCategoryRecommendation(data, "Toby", scoringFunction, "==== Top 3 Pearson Category Matches ====");
-testCategoryRecommendation(data, "Toby", scoringFunction2, "==== Top 3 Category Euclidean Matches ====");
-testCategoryRecommendation(data, "Toby", scoringFunction3, "==== Top 3 Category Tanimoto Matches ====");
+TestCategoryRecommendation(data, "Toby", pearsonScoring, "==== Top 3 Pearson Category Matches ====");
+TestCategoryRecommendation(data, "Toby", euclideanScoring, "==== Top 3 Category Euclidean Matches ====");
+TestCategoryRecommendation(data, "Toby", tanimotoScoring, "==== Top 3 Category Tanimoto Matches ====");
 
-testFeatureRecommendation(data, "Toby", scoringFunction, "==== Top 3 Feature Pearson Matches ====");
-testFeatureRecommendation(data, "Toby", scoringFunction2, "==== Top 3 Feature Euclidean Matches ====");
-testFeatureRecommendation(data, "Toby", scoringFunction3, "==== Top 3 Feature Tanimoto Matches ====");
+TestFeatureRecommendation(data, "Toby", pearsonScoring, "==== Top 3 Feature Pearson Matches ====");
+TestFeatureRecommendation(data, "Toby", euclideanScoring, "==== Top 3 Feature Euclidean Matches ====");
+TestFeatureRecommendation(data, "Toby", tanimotoScoring, "==== Top 3 Feature Tanimoto Matches ====");
 
-testCategoriesForFeatureRecommendation(data, "The Night Listener", scoringFunction, "==== Top Pearson Category for feature Matches ====");
-testCategoriesForFeatureRecommendation(data, "The Night Listener", scoringFunction2, "==== Top Category for feature Euclidean Matches ====");
-testCategoriesForFeatureRecommendation(data, "The Night Listener", scoringFunction3, "==== Top Category for feature Tanimoto Matches ====");
+TestCategoriesForFeatureRecommendation(data, "The Night Listener", pearsonScoring, "==== Top Pearson Category for feature Matches ====");
+TestCategoriesForFeatureRecommendation(data, "The Night Listener", euclideanScoring, "==== Top Category for feature Euclidean Matches ====");
+TestCategoriesForFeatureRecommendation(data, "The Night Listener", tanimotoScoring, "==== Top Category for feature Tanimoto Matches ====");

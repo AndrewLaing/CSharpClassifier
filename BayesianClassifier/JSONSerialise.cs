@@ -3,7 +3,7 @@ using System.Text;
 
 namespace BayesianClassifier
 {
-    public static class JSONSerialise
+    public static class JsonSerialise
     {
         /// <summary>
         /// Serialises an object as a json file
@@ -67,7 +67,7 @@ namespace BayesianClassifier
         /// <param name="s">String to write to file.</param>
         private static void WriteStringToFile(string filename, string s)
         {
-            StreamWriter sw = new StreamWriter(filename);
+            StreamWriter sw = new(filename);
             sw.WriteLine(s);
             sw.Close();
         }
@@ -99,8 +99,8 @@ namespace BayesianClassifier
         /// <param name="obj">Object to deserialise string into.</param>
         private static void Deserialise<T>(string? json, ref T obj)
         {
-            MemoryStream ms = new MemoryStream();
-            StreamWriter sw = new StreamWriter(ms);
+            MemoryStream ms = new();
+            StreamWriter sw = new(ms);
 
             sw.Write(json);
             sw.Flush();
@@ -123,7 +123,7 @@ namespace BayesianClassifier
         /// <param name="s">Reference to string which will contain the serialised object.</param>
         private static void Serialise<T>(T obj, ref string s)
         {
-            MemoryStream ms = new MemoryStream();
+            MemoryStream ms = new();
             new DataContractJsonSerializer(typeof(T)).WriteObject(ms, obj);
             s = Encoding.Default.GetString(ms.ToArray());
         }

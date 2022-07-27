@@ -2,7 +2,7 @@
 using BayesianClassifier;
 
 
-NaiveBayes<string> nb = new NaiveBayes<string>(0.3, 0.9);
+NaiveBayes<string> nb = new(0.3, 0.9);
 nb.Train("Roger", "man");
 nb.Train("Roger", "code");
 nb.Train("Roger", "man");
@@ -16,13 +16,13 @@ nb.Train("Cheese", "food");
 nb.Train("Cheese", "dairy product");
 nb.Train("Cheese", "dairy product");
 
-List<string> features1 = new List<string>();
+List<string> features1 = new();
 features1.Add("Roger");
 
 Console.Write("\nRoger is classified as ");
 Console.Write(nb.Classify(features1));
 
-List<string> features2 = new List<string>();
+List<string> features2 = new();
 features2.Add("Cheese");
 features2.Add("Sandwich");
 
@@ -32,7 +32,7 @@ Console.Write(nb.Classify(features2));
 Console.Write("\n-----------------------------------");
 nb.SaveClassifier("nb");
 
-NaiveBayes<int> nb1 = new NaiveBayes<int>(0.3, 0.9);
+NaiveBayes<int> nb1 = new(0.3, 0.9);
 nb1.Train(1111, "man");
 nb1.Train(1111, "code");
 nb1.Train(1111, "man");
@@ -46,13 +46,13 @@ nb1.Train(3333, "food");
 nb1.Train(3333, "food");
 nb1.Train(3333, "food");
 
-List<int> features3 = new List<int>();
+List<int> features3 = new();
 features3.Add(1111);
 
 Console.Write("\n1111 is classified as ");
 Console.Write(nb1.Classify(features3));
 
-List<int> features4 = new List<int>();
+List<int> features4 = new();
 features4.Add(2222);
 features4.Add(3333);
 
