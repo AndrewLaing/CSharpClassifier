@@ -112,21 +112,16 @@ namespace CollaborativeFiltering
                 return 0.0;
             }
 
-            double sumOfSquares = 0.0;
             Dictionary<string, double>.KeyCollection categoryAFeatures = GetFeatureNamesInCategory(categoryA);
             Dictionary<string, double>.KeyCollection categoryBFeatures = GetFeatureNamesInCategory(categoryB);
+            IEnumerable<string> sharedFeatures = categoryAFeatures.Intersect(categoryBFeatures);
 
-            foreach (string featureInA in categoryAFeatures)
+            double sumOfSquares = 0.0;
+            foreach(string feature in sharedFeatures)
             {
-                foreach (string featureInB in categoryBFeatures)
-                {
-                    if (featureInA == featureInB)
-                    {
-                        double valueA = GetValueForFeatureInCategory(categoryA, featureInA);
-                        double valueB = GetValueForFeatureInCategory(categoryB, featureInB);
-                        sumOfSquares += Pow((valueA - valueB), 2);
-                    }
-                }
+                double valueA = GetValueForFeatureInCategory(categoryA, feature);
+                double valueB = GetValueForFeatureInCategory(categoryB, feature);
+                sumOfSquares += Pow((valueA - valueB), 2);
             }
 
             if (sumOfSquares == 0.0)            // if the 2 categories have no common features
@@ -150,25 +145,21 @@ namespace CollaborativeFiltering
             double sumOfSquaresB = 0.0;
             double sumOfProducts = 0.0;         // sum of products of rating by critic_1 for item * those of critic_2 
             int n = 0;                          // number of mutually rated items
+
             Dictionary<string, double>.KeyCollection categoryAFeatures = GetFeatureNamesInCategory(categoryA);
             Dictionary<string, double>.KeyCollection categoryBFeatures = GetFeatureNamesInCategory(categoryB);
+            IEnumerable<string> sharedFeatures = categoryAFeatures.Intersect(categoryBFeatures);
 
-            foreach (string featureInA in categoryAFeatures)
+            foreach(string feature in sharedFeatures)
             {
-                foreach (string featureInB in categoryBFeatures)
-                {
-                    if (featureInA == featureInB)
-                    {
-                        double valueA = GetValueForFeatureInCategory(categoryA, featureInA);
-                        double valueB = GetValueForFeatureInCategory(categoryB, featureInB);
-                        sumA += valueA;
-                        sumB += valueB;
-                        sumOfSquaresA += Pow(valueA, 2);
-                        sumOfSquaresB += Pow(valueB, 2);
-                        sumOfProducts += (valueA * valueB);
-                        n++;
-                    }
-                }
+                double valueA = GetValueForFeatureInCategory(categoryA, feature);
+                double valueB = GetValueForFeatureInCategory(categoryB, feature);
+                sumA += valueA;
+                sumB += valueB;
+                sumOfSquaresA += Pow(valueA, 2);
+                sumOfSquaresB += Pow(valueB, 2);
+                sumOfProducts += (valueA * valueB);
+                n++;
             }
 
             // if they have no ratings in common
@@ -199,17 +190,12 @@ namespace CollaborativeFiltering
 
             Dictionary<string, double>.KeyCollection categoryAFeatures = GetFeatureNamesInCategory(categoryA);
             Dictionary<string, double>.KeyCollection categoryBFeatures = GetFeatureNamesInCategory(categoryB);
+            IEnumerable<string> sharedFeatures = categoryAFeatures.Intersect(categoryBFeatures);
 
             int sharedFeaturesCount = 0;
-            foreach (string featureInA in categoryAFeatures)
+            foreach (string feature in sharedFeatures)
             {
-                foreach (string featureInB in categoryBFeatures)
-                {
-                    if (featureInA == featureInB)
-                    {
-                        sharedFeaturesCount++;
-                    }
-                }
+                sharedFeaturesCount++;
             }
 
             // Calculate TanimotoScore
@@ -285,7 +271,7 @@ namespace CollaborativeFiltering
                             double valueForFeature = GetValueForFeatureInCategory(category, feature);
                             if (!totals.ContainsKey(feature))
                             {
-                                totals[feature] = valueForFeature * simScore;
+                                totals.Add(feature, valueForFeature * simScore);
                             }
                             else
                             {
@@ -293,7 +279,7 @@ namespace CollaborativeFiltering
                             }
                             if (!simSums.ContainsKey(feature))
                             {
-                                simSums[feature] = simScore;
+                                simSums.Add(feature, simScore);
                             }
                             else
                             {
@@ -389,11 +375,11 @@ namespace CollaborativeFiltering
                         continue;
                     }
 
-                    foreach (string candidate in GetFeatureNamesInCategory(category))
+                    foreach (string feature in GetFeatureNamesInCategory(category))
                     {
-                        if (featureName.Equals(candidate))
+                        if (featureName.Equals(feature))
                         {
-                            double value_for_feature = GetValueForFeatureInCategory(category, candidate);
+                            double value_for_feature = GetValueForFeatureInCategory(category, feature);
                             total += value_for_feature * simScore;
                             simSum += simScore;
                             break;
