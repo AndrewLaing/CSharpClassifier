@@ -32,12 +32,12 @@
             _dict[feature].IncrementValue(category);
         }
 
-        public List<T> GetFeatures()
+        public IEnumerable<T> GetFeatures()
         {
             return _dict.Keys.ToList();
         }
 
-        public List<string> GetCategoriesForFeature(T feature)
+        public IEnumerable<string> GetCategoriesForFeature(T feature)
         {
             return _dict[feature].GetCategories();
         }
@@ -57,7 +57,7 @@
             int sum = 0;
             if (_dict.ContainsKey(feature))
             {
-                List<string> categories = GetCategoriesForFeature(feature);
+                IEnumerable<string> categories = GetCategoriesForFeature(feature);
                 foreach (var category in categories)
                 {
                     sum += _dict[feature].GetValue(category);

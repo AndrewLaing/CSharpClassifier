@@ -8,9 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Reference Include="BayesianClassifier">
-      <HintPath>..\..\BayesianClassifier\BayesianClassifier\bin\Debug\net6.0\BayesianClassifier.dll</HintPath>
-    </Reference>
+    <ProjectReference Include="..\BayesianClassifier\BayesianClassifier.csproj" />
   </ItemGroup>
 
 </Project>

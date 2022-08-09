@@ -40,7 +40,7 @@
             AddKeyValuePair(category, value);
         }
 
-        public List<String> GetCategories()
+        public IEnumerable<String> GetCategories()
         {
             return _dict.Keys.ToList();
         }

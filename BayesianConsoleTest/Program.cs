@@ -22,9 +22,9 @@ features1.Add("Roger");
 Console.Write("\nRoger is classified as ");
 Console.Write(nb.Classify(features1));
 
-List<string> features2 = new();
-features2.Add("Cheese");
-features2.Add("Sandwich");
+Stack<string> features2 = new();
+features2.Push("Cheese");
+features2.Push("Sandwich");
 
 Console.Write("\n(Cheese, Sandwich) is classified as ");
 Console.Write(nb.Classify(features2));
@@ -52,9 +52,9 @@ features3.Add(1111);
 Console.Write("\n1111 is classified as ");
 Console.Write(nb1.Classify(features3));
 
-List<int> features4 = new();
-features4.Add(2222);
-features4.Add(3333);
+Queue<int> features4 = new();
+features4.Enqueue(2222);
+features4.Enqueue(3333);
 
 Console.Write("\n(2222, 3333) is classified as ");
 Console.Write(nb1.Classify(features4));
@@ -62,7 +62,7 @@ Console.Write(nb1.Classify(features4));
 Console.ReadKey(); Console.Write("\n-----------------------------------");
 
 Console.WriteLine("\nLoading stored classifier nb");
-NaiveBayes<string> nb_copy = new NaiveBayes<string>(0.3, 0.9);
+NaiveBayes<string> nb_copy = new(0.3, 0.9);
 nb_copy.LoadClassifier("nb");
 
 Console.Write("\n(Cheese, Sandwich) is classified by the loaded classifier as ");

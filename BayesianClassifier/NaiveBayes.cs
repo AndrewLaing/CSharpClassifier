@@ -106,12 +106,12 @@
             return _categoryDict.GetSumOfValues();
         }
 
-        private List<string> GetCategoryKeys()
+        private IEnumerable<string> GetCategoryKeys()
         {
             return _categoryDict.GetCategories();
         }
 
-        public void Train(List<T> features, string category)
+        public void Train(IEnumerable<T> features, string category)
         {
             foreach (T feature in features)
             {
@@ -156,7 +156,7 @@
         /// <summary>
         /// Returns the probabilty of the category existing in all features
         /// </summary>
-        private double CommonAppearanceProbability(List<T> features, string category)
+        private double CommonAppearanceProbability(IEnumerable<T> features, string category)
         {
             double probability = 1.0;
 
@@ -171,22 +171,21 @@
         /// <summary>
         /// Returns the probability for the category passed
         /// </summary>
-        private double Probability(List<T> features, string category)
+        private double Probability(IEnumerable<T> features, string category)
         {
-
             double categoryProbability = GetCategoryValue(category) / (double)GetCategoriesSum();
             double commonAppearanceProbabilty = CommonAppearanceProbability(features, category);
 
             return categoryProbability * commonAppearanceProbabilty;
         }
 
-        public string Classify(List<T> features)
+        public string Classify(IEnumerable<T> features)
         {
             double max = 0.0;
             double categoryProbability;
             string best = _defaultCategory;
 
-            List<string> categories = GetCategoryKeys();
+            IEnumerable<string> categories = GetCategoryKeys();
             foreach (string category in categories)
             {
                 categoryProbability = Probability(features, category);

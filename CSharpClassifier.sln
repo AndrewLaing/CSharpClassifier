@@ -7,9 +7,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BayesianClassifier", "Bayes
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BayesianConsoleTest", "BayesianConsoleTest\BayesianConsoleTest.csproj", "{D47CAD78-DFBF-4136-95C2-E3885DD6B484}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CollaborativeFiltering", "CollaborativeFiltering\CollaborativeFiltering.csproj", "{1D40F3B6-A4C4-4E23-A0B0-7E79F4614535}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CollaborativeFiltering", "CollaborativeFiltering\CollaborativeFiltering.csproj", "{1D40F3B6-A4C4-4E23-A0B0-7E79F4614535}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CollaborativeFilteringConsoleTest", "CollaborativeFilteringConsoleTest\CollaborativeFilteringConsoleTest.csproj", "{338BBE5E-489D-4AF2-A871-FCD6DB347ED5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CollaborativeFilteringConsoleTest", "CollaborativeFilteringConsoleTest\CollaborativeFilteringConsoleTest.csproj", "{338BBE5E-489D-4AF2-A871-FCD6DB347ED5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
